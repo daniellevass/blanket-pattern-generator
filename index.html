@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Blanket Pattern Generator</title>
+</head>
+<body>
+  <p>
+   height = <input type="number" id="txtHeight" value="5"></input>
+   width = <input type="number" id="txtWidth" value="5"></input></p>
+   <p>Colours (in hex, seperated by comma, minimum 4)</p>
+   <p><input type="text" style="width:50%;" id="txtColours" value="#AAB2BD,#E6E9ED,#656D78,#2a7286,#d05331"></input></p>
+   <p><button onclick="javascript:makeBlanket();">make!</button></p>
+
+   <div id="container_canvas"></div>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+<script>
+
+function calculateColour(x,y){
+  var found = false;
+  var tries = 20;
+  while (!found
+    && tries > 0){
+
+    var colour = colours[Math.floor(Math.random() * colours.length) + 0];
+
+    var colourLeft = matrix[y][x-1];
+    if (colourLeft) {
+      if (colourLeft == colour) {
+        continue;
+      }
+    }
+
+    if (y > 0){
+
+      var colourTop = matrix[y-1][x];
+      if (colourTop) {
+        if (colourTop == colour) {
+          continue;
+        }
+      }
+
+      if (x >0) {
+        var colourTopLeft = matrix[y-1][x-1];
+        if (colourTopLeft) {
+          if (colourTopLeft == colour) {
+            continue;
+          }
+        }
+      }
+
+      if (x < numberX) {
+        var colourTopRight = matrix[y-1][x+1];
+        if (colourTopRight) {
+          if (colourTopRight == colour) {
+            continue;
+          }
+        }
+      }
+
+    }
+
+    tries --;
+
+      if (colourAllocations[colour] > 0){
+        colourAllocations[colour] --;
+        found = true;
+         matrix[y][x] = colour;
+        return colour;
+      }
+  }
+
+}
+
+function drawIndividualCircle(x, y, offset) {
+  var circle = paper.circle(50 + offset + (x*50), 50 + (y*45), 25);
+  circle.attr("fill", calculateColour(x,y));
+  circle.attr("stroke-width", "0");
+}
+
+function drawRowCircles(y, number, offset){
+  for (var i = 0; i < number; i++){
+    drawIndividualCircle(i, y, offset)
+  }
+}
+
+function drawAllCircles(){
+  for (var i = 0; i < numberY; i ++){
+    matrix[i] = [];
+    if(i % 2){
+      drawRowCircles(i, numberX, 0);
+    } else {
+      drawRowCircles(i, numberX, 25);
+    }
+  }
+}
+
+var paper;
+var numberX;
+var numberY;
+var colours;
+var numOfEachColour;
+var colourAllocations = [];
+var matrix = [];
+
+
+  function makeBlanket(){
+
+    console.log($("#txtWidth").val());
+    console.log($("#txtHeight").val());
+
+    //validate inputs
+    if (!$("#txtHeight").val() || $("#txtHeight").val().length == 0 || isNaN($("#txtHeight").val()) ) {
+        return false;
+    }
+
+    if (!$("#txtHeight").val() || $("#txtHeight").val().length == 0 || isNaN($("#txtHeight").val()) ) {
+        return false;
+    }
+
+    if (!$("#txtColours").val() || $("#txtColours").val().length == 0) {
+        return false;
+    }
+
+     var coloursEntry = $("#txtColours").val().split(",");
+     if (coloursEntry.length < 4) {
+       return false;
+     }
+
+     paper.remove();
+
+     numberX = $("#txtWidth").val();
+     numberY = $("#txtHeight").val();
+
+     paper = Raphael(document.getElementById('container_canvas'), (numberX * 50) + 150, (numberY * 50) + 150);
+
+
+     colours = coloursEntry;
+     numOfEachColour = Math.ceil( (numberX * numberY) / colours.length);
+
+     for (var index in colours){
+         colourAllocations[colours[index]] = numOfEachColour;
+     }
+
+     drawAllCircles();
+
+  }
+
+
+function makeStarterBlanket(){
+    numberX = 16;
+    numberY = 8;
+
+    paper = Raphael(document.getElementById('container_canvas'), (numberX * 50) + 150, (numberY * 50) + 150);
+
+
+    colours = ["#AAB2BD", "#E6E9ED", "#656D78", "#2a7286", "#d05331", "#c6c88a"];
+    numOfEachColour = Math.ceil( (numberX * numberY) / colours.length);
+
+    for (var index in colours){
+        colourAllocations[colours[index]] = numOfEachColour;
+    }
+
+    drawAllCircles();
+}
+
+  makeStarterBlanket();
+</script>
+</html>
