@@ -12,7 +12,12 @@
    <p>Colours (in hex, seperated by comma, minimum 4)</p>
    <p><input type="text" style="width:50%;" id="txtColours" value="#AAB2BD,#E6E9ED,#656D78,#2a7286,#d05331"></input></p>
    <p><button onclick="javascript:makeBlanket();">make!</button></p>
+   <div id="container_totals">
 
+     <svg height="100" width="1000">
+     </svg>
+
+   </div>
    <div id="container_canvas"></div>
 
 </body>
@@ -24,13 +29,16 @@
 <script>
 
 function calculateColour(x,y){
+  // console.log('calculate colour = ' + x + "," + y)
   var found = false;
-  var tries = 20;
+  var tries = 50;
   while (!found
     && tries > 0){
 
     var colour = colours[Math.floor(Math.random() * colours.length) + 0];
+    tries --;
 
+    //check it's not the same as the colour to the left
     var colourLeft = matrix[y][x-1];
     if (colourLeft) {
       if (colourLeft == colour) {
@@ -38,8 +46,8 @@ function calculateColour(x,y){
       }
     }
 
+    //check it's not the same as above
     if (y > 0){
-
       var colourTop = matrix[y-1][x];
       if (colourTop) {
         if (colourTop == colour) {
@@ -67,7 +75,7 @@ function calculateColour(x,y){
 
     }
 
-    tries --;
+      // console.log(colour + "=" +colourAllocations[colour]);
 
       if (colourAllocations[colour] > 0){
         colourAllocations[colour] --;
@@ -80,18 +88,22 @@ function calculateColour(x,y){
 }
 
 function drawIndividualCircle(x, y, offset) {
+  // console.log("draw individual circle = " + x + "," +y)
   var circle = paper.circle(50 + offset + (x*50), 50 + (y*45), 25);
   circle.attr("fill", calculateColour(x,y));
+  // console.log("got colour for circle =  " + x + "," +y);
   circle.attr("stroke-width", "0");
 }
 
 function drawRowCircles(y, number, offset){
+  // console.log("drawing row circles = " + y);
   for (var i = 0; i < number; i++){
     drawIndividualCircle(i, y, offset)
   }
 }
 
 function drawAllCircles(){
+  console.log("drawing all circles");
   for (var i = 0; i < numberY; i ++){
     matrix[i] = [];
     if(i % 2){
@@ -103,36 +115,56 @@ function drawAllCircles(){
 }
 
 var paper;
-var numberX;
-var numberY;
+var numberX; //number of circles width
+var numberY; //number of circles height
 var colours;
-var numOfEachColour;
-var colourAllocations = [];
+var numOfEachColour; //number of circles for each colour
+var colourAllocations = []; //allocation of total number of colours (prevents everything being 1 colour)
 var matrix = [];
 
 
-  function makeBlanket(){
-
+  function validateInputs(){
     console.log($("#txtWidth").val());
     console.log($("#txtHeight").val());
 
     //validate inputs
-    if (!$("#txtHeight").val() || $("#txtHeight").val().length == 0 || isNaN($("#txtHeight").val()) ) {
+    if (!$("#txtWidth").val()
+        || $("#txtWidth").val().length == 0
+        || isNaN($("#txtWidth").val()) ) {
+          console.log("width not valid");
+          return false;
+    }
+
+    if (!$("#txtHeight").val()
+        || $("#txtHeight").val().length == 0
+        || isNaN($("#txtHeight").val()) ) {
+          console.log("height not valid");
+          return false;
+    }
+
+    if (!$("#txtColours").val()
+        || $("#txtColours").val().length == 0) {
+          console.log("colour input not valid");
         return false;
     }
 
-    if (!$("#txtHeight").val() || $("#txtHeight").val().length == 0 || isNaN($("#txtHeight").val()) ) {
-        return false;
+    return true;
+
+  }
+
+  function makeBlanket(){
+
+    if (!validateInputs()) {
+      console.log("inputs not valid!");
+      return false;
     }
 
-    if (!$("#txtColours").val() || $("#txtColours").val().length == 0) {
-        return false;
+    var coloursEntry = $("#txtColours").val().split(",");
+    console.log("colours entry = " + coloursEntry.length);
+    if (coloursEntry.length < 4) {
+      console.log("colours not valid :(");
+      return false;
     }
-
-     var coloursEntry = $("#txtColours").val().split(",");
-     if (coloursEntry.length < 4) {
-       return false;
-     }
 
      paper.remove();
 
@@ -144,6 +176,8 @@ var matrix = [];
 
      colours = coloursEntry;
      numOfEachColour = Math.ceil( (numberX * numberY) / colours.length);
+
+     console.log("number of each colour = " + numOfEachColour);
 
      for (var index in colours){
          colourAllocations[colours[index]] = numOfEachColour;
