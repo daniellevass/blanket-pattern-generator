@@ -133,6 +133,21 @@ function calculateNewColour(x, y, coloursICanUse) {
     previousColour = matrix[y][x-2];
   }
 
+  let previousUpLeftColour = undefined;
+  // if we're on row 1 (second row) -> we need to check top and top left
+  if (y > 0) {
+    if(y % 2 == 0) {
+      if (x < numberX) {
+        previousUpLeftColour = (matrix[y-1][x])
+      }
+    } else {
+      // if we're row 2 (third row) -> we need to check top and top right
+      if (x >= 2) {
+        previousUpLeftColour = (matrix[y-1][x-2]) // top left circle
+      }
+    }
+  }
+
   // then let's look at our colourAllocations and work out which one hasn't been used so much
   let arr = [];
   for(index in coloursICanUse) {
@@ -141,6 +156,10 @@ function calculateNewColour(x, y, coloursICanUse) {
 
     if (colour == previousColour) {
       count = Math.floor(count/10)
+    }
+
+    if (colour == previousUpLeftColour) {
+      count = Math.floor(count/5)
     }
 
     for(let i = 0; i < count; i++) {
