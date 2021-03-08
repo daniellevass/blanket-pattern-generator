@@ -98,8 +98,6 @@ function calculateColour_v2(x,y) {
 
       // if we're on row 1 (second row) -> we need to check top and top left
       if(y % 2 == 0) {
-
-
         if (x < numberX) {
           usedColours.add(matrix[y-1][x+1])
         }
@@ -121,10 +119,35 @@ function calculateColour_v2(x,y) {
       }
     }
 
-  var newColour = coloursICanUse[Math.floor(Math.random() * coloursICanUse.length) + 0];
+  var newColour = calculateNewColour(x, y, coloursICanUse);
+  colourAllocations[newColour] = colourAllocations[newColour] --;
   matrix[y][x] = newColour;
   return newColour;
 
+}
+
+function calculateNewColour(x, y, coloursICanUse) {
+  // take a look at the one two spaces left - let's reduce that chance of it coming back
+  let previousColour = undefined;
+  if (x >= 2) {
+    previousColour = matrix[y][x-2];
+  }
+
+  // then let's look at our colourAllocations and work out which one hasn't been used so much
+  let arr = [];
+  for(index in coloursICanUse) {
+    let colour = coloursICanUse[index];
+    let count = colourAllocations[colour];
+
+    if (colour == previousColour) {
+      count = Math.floor(count/10)
+    }
+
+    for(let i = 0; i < count; i++) {
+      arr.push(colour);
+    }
+  }
+  return arr[Math.floor(Math.random() * arr.length) + 0]
 }
 
 function drawIndividualCircle(x, y, offset) {
